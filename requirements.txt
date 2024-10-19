@@ -1,0 +1,16 @@
+weave
+openai
+fastapi
+uvicorn
+pydantic
+requests
+python-dotenv
+cartesia
+weave
+rpi-lgpio; platform_system == "Linux"
+pyserial
+pvporcupine
+pvrecorder
+loguru
+pyaudio
+pygame
