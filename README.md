@@ -8,8 +8,8 @@ The board communicates with the Raspberry Pi using the UART interface, leveragin
 
 ### Raspberry Pi Hardware Config 
 
-| ---- | ---- | 
 | Pi Pin | Purpose | 
+| ------ | ------- | 
 | GPIO 14 (Pin 8)| TX |
 | GPIO 15 (Pin 10) | RX |
 
