@@ -6,7 +6,15 @@
 
 The board communicates with the Raspberry Pi using the UART interface, leveraging the Raspberry Pi’s GPIO pins for serial communication. 
 
-### Raspberry Pi Configuration
+### Raspberry Pi Hardware Config 
+
+| ---- | ---- | 
+| Pi Pin | Purpose | 
+| GPIO 14 (Pin 8)| TX |
+| GPIO 15 (Pin 10) | RX |
+
+
+### Raspberry Pi Software Config
 
 #### Enable UART 
 UART can be enabled by configuring the Pi’s /boot/config.txt file or using the raspi-config tool: `sudo raspi-config`  
