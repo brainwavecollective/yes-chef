@@ -1,14 +1,14 @@
 default_position:
-  servo1: 2459
-  servo2: 908
-  servo3: 1903
-  servo4: 2595
-  servo5: 3596
-  servo6: 1153
+  servo1: 2022
+  servo2: 929
+  servo3: 2344
+  servo4: 1596
+  servo5: 1518
+  servo6: 1411
 standing_position:
-  servo1: 2550
-  servo2: 1005
-  servo3: 1851
-  servo4: 2601
-  servo5: 3580
-  servo6: 1153
+  servo1: 2282
+  servo2: 1670
+  servo3: 1244
+  servo4: 1565
+  servo5: 1518
+  servo6: 1493

@@ -20,7 +20,9 @@ import pygame
 from PIL import Image
 import numpy as np
 import cv2
-
+from io import BytesIO
+import tempfile
+import wave
 from cartesia import AsyncCartesia
 # Add this import at the top of the file, with the other imports
 from camera_module import Camera, get_camera
@@ -29,7 +31,7 @@ import weave
 from dotenv import load_dotenv
 
 # Import the chat model functions
-# from gemini import gemini_chat
+from ImageDescription import gemini_chat
 # from openai_client import openai_chat
 # from openrouter import openrouter_chat
 
@@ -107,7 +109,7 @@ async def lifespan(app: FastAPI):
     if not camera.start():
         raise RuntimeError("Could not start camera")
     
-    weave.init('altryne/yes-chef')
+    weave.init('yes-chef')
 
     # Initialize Porcupine
     access_key = os.getenv("PICOVOICE_ACCESS_KEY")
@@ -120,9 +122,11 @@ async def lifespan(app: FastAPI):
     else:
         keyword_path = "./porcupine_models/Hey-Chef_en_raspberry-pi_v3_0_0.ppn"
     
-
+    devices = PvRecorder.get_available_devices()
+    for i, device in enumerate(devices):
+        print(f"{i}: {device}")
     porcupine = pvporcupine.create(access_key=access_key, keyword_paths=[keyword_path])
-    recorder = PvRecorder(device_index=3, frame_length=porcupine.frame_length)
+    recorder = PvRecorder(device_index=0, frame_length=porcupine.frame_length)
     recorder.start()
 
     # Initialize puppet control once
@@ -304,6 +308,7 @@ async def process_motion(pil_image):
     await stream_text_to_speech(response)
     return response
 
+@weave.op
 async def stream_text_to_speech(text):
     global audio_playing
     puppet = app.state.puppet  # Use the existing puppet instance
@@ -314,7 +319,7 @@ async def stream_text_to_speech(text):
         puppet.start_body_movement()
         puppet.eyes_on()
 
-        await client.stream_tts(text)
+        audio_data = await client.stream_tts(text)
     except Exception as e:
         print(f"Error during text-to-speech: {e}")
     finally:
@@ -322,6 +327,20 @@ async def stream_text_to_speech(text):
         audio_playing = False
         puppet.stop_body_movement()
         puppet.eyes_off()
+    
+    # Create a temporary file
+    with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_wav:
+        # Write audio data to the temporary WAV file
+        with wave.open(temp_wav.name, 'wb') as wave_file:
+            wave_file.setnchannels(1)  # Mono
+            wave_file.setsampwidth(2)  # 16-bit
+            wave_file.setframerate(44100)  # Assuming 24kHz sample rate
+            wave_file.writeframes(audio_data)
+        
+        # Open the temporary WAV file for reading
+        wave_obj = wave.open(temp_wav.name, 'rb')
+    
+    return wave_obj
 
 def wake_word_detector():
     global porcupine, recorder, puppet
@@ -396,96 +415,99 @@ def process_image_with_gemini(pil_image):
     # You can add logic here to use the Gemini response if needed
 
 # Update the handle_wake_word function for regular mode
+@weave.op
 async def handle_wake_word():
     global camera
     # move the puppet body and light up eyes
-    puppet.start_body_movement()
-    puppet.eyes_on()
+    puppet.load_and_set_state("standing_position")
     # # logger.info("Wake word detected! Taking a picture...")
 
-    # # audio_file = f"sounds/spookybg_{np.random.randint(1, 6)}.wav"
+    audio_file = f"sounds/bgmusic{np.random.randint(1, 6)}.wav"
     # # # Define function to play audio file
 
-    # def play_sound(file_path):
-    #     try:
-    #         pygame.mixer.init()
-    #         pygame.mixer.music.load(file_path)
-    #         pygame.mixer.music.play()
-    #         while pygame.mixer.music.get_busy():
-    #             pygame.time.Clock().tick(10)
-    #     except Exception as e:
-    #         logger.error(f"Error playing sound: {e}")
+    def play_sound(file_path):
+        try:
+            pygame.mixer.init()
+            pygame.mixer.music.load(file_path)
+            pygame.mixer.music.play()
+            while pygame.mixer.music.get_busy():
+                pygame.time.Clock().tick(10)
+        except Exception as e:
+            logger.error(f"Error playing sound: {e}")
 
-    # # Play audio file in a separate thread
-    # audio_thread = Thread(target=play_sound, args=(audio_file,), daemon=True)
-    # audio_thread.start()
+    # Play audio file in a separate thread
+    audio_thread = Thread(target=play_sound, args=(audio_file,), daemon=True)
+    audio_thread.start()
     
-    # max_retries = 3
-    # retry_count = 0
-    # while retry_count < max_retries:
-    #     try:
-    #         pil_image = camera.capture_image()
-    #         if pil_image:
-    #             image_handler.save_image(pil_image)
-    #         break
-    #     except Exception as e:
-    #         retry_count += 1
-    #         logger.error(f"Error capturing image (attempt {retry_count}/{max_retries}): {e}")
-    #         if retry_count == max_retries:
-    #             logger.error("Max retries reached. Failed to capture image.")
-    #             pil_image = None
-    #         else:
-    #             time.sleep(1)  # Wait for 1 second before retrying
+    max_retries = 3
+    retry_count = 0
+    while retry_count < max_retries:
+        try:
+            pil_image = camera.capture_image()
+            # if pil_image:
+            #     image_handler.save_image(pil_image)
+            break
+        except Exception as e:
+            retry_count += 1
+            logger.error(f"Error capturing image (attempt {retry_count}/{max_retries}): {e}")
+            if retry_count == max_retries:
+                logger.error("Max retries reached. Failed to capture image.")
+                pil_image = None
+            else:
+                time.sleep(1)  # Wait for 1 second before retrying
 
     
-    # if pil_image is not None:
-    #     # Save the image
-    #     pil_image.save("static/taken_image.jpg")
+    if pil_image is not None:
+        # Save the image
+        pil_image.save("static/taken_image.jpg")
         
-    #     # Notify clients about the new image
-    #     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    #     await notify_clients_new_image(timestamp)
+        # Notify clients about the new image
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # await notify_clients_new_image(timestamp)
 
-    #     logger.info("Image captured successfully. Processing with LLM...")
-    #     if CHAT_MODEL == "gemini":
-    #         response = gemini_chat(pil_image)
-    #     elif CHAT_MODEL == "openai":
-    #         response = openai_chat(pil_image)
-    #     elif CHAT_MODEL == "openrouter":
-    #         response = openrouter_chat(pil_image)
-    #     else:
-    #         response = "I'm sorry, but I couldn't process the image at the moment."
+        logger.info("Image captured successfully. Processing with LLM...")
+        if CHAT_MODEL == "gemini":
+            response = gemini_chat(pil_image)
+        else:
+            response = "Oh fuck off you muppet"
         
-        # logger.info(f"Received LLM response: {response}")
-    await stream_text_to_speech("Hey you muppet, what do you want you sausge? Get out of my kitchen!")
+        logger.info(f"Received LLM response: {response}")
+        puppet.move_servo(1, position=2220)
+        audio_data = await stream_text_to_speech(response)
         
         # stop the puppet body movement and turn off the eyes
-    puppet.stop_body_movement()
-    puppet.eyes_off()
-    # else:
-    #     logger.error("Failed to capture an image.")
-    #     await stream_text_to_speech("Hello there! I'm Chef, your friendly kitchen assistant. How can I help you today?")
-    #     puppet.stop_body_movement()
-    #     puppet.eyes_off()
+        puppet.stop_body_movement()
+        puppet.eyes_off()
+    else:
+        logger.error("Failed to capture an image.")
+        await stream_text_to_speech("Hello there! I'm Chef, your friendly kitchen assistant. How can I help you today?")
+        puppet.stop_body_movement()
+        puppet.eyes_off()
     # Fade out the playing pygame music
-    # try:
-    #     pygame.mixer.music.fadeout(5000)  # Fade out over 2 seconds
-    #     pygame.time.wait(5000)  # Wait for the fadeout to complete
-    #     pygame.mixer.music.stop()  # Ensure the music is fully stopped
-    #     pygame.mixer.quit()  # Clean up the mixer
-    # except Exception as e:
-    #     logger.error(f"Error fading out music: {e}")
+    try:
+        pygame.mixer.music.fadeout(5000)  # Fade out over 2 seconds
+        pygame.time.wait(5000)  # Wait for the fadeout to complete
+        pygame.mixer.music.stop()  # Ensure the music is fully stopped
+        puppet.load_and_set_state("default_position")
+        pygame.mixer.quit()  # Clean up the mixer
+    except Exception as e:
+        logger.error(f"Error fading out music: {e}")
 
-    return True
-
-async def notify_clients_new_image(timestamp):
-    data = {
-        "type": "image",
-        "data": {
-            "timestamp": timestamp
-        }
+    return {
+        "image": pil_image,
+        "audio": audio_data, 
+        "bg_music": wave.open(audio_file, 'rb'),
+        "text response": response
     }
-    await app.state.sse_manager.broadcast(json.dumps(data))
+
+# async def notify_clients_new_image(timestamp):
+#     data = {
+#         "type": "image",
+#         "data": {
+#             "timestamp": timestamp
+#         }
+#     }
+#     await app.state.sse_manager.broadcast(json.dumps(data))
 
 @app.get("/taken_image.jpg")
 async def get_image():
