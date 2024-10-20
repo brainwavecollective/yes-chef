@@ -54,9 +54,9 @@ This is the phrase that will cause the robot to come alive.
 ## Step 3: Get Roasted 
 
 # Team 
-[Alex Volkov](https://www.linkedin.com/in/alex-volkov-/)
-[Daniel Ritchie](https://www.linkedin.com/in/danielritchie123/)
-[Junaid Dawud](https://www.linkedin.com/in/junaid-dawud-48529564/)
+[Alex Volkov](https://www.linkedin.com/in/alex-volkov-/)  
+[Daniel Ritchie](https://www.linkedin.com/in/danielritchie123/)  
+[Junaid Dawud](https://www.linkedin.com/in/junaid-dawud-48529564/)  
 
-Enjoy. We sure had fun with this one!  
+Enjoy. We sure had fun with this one!   
 
