@@ -1,63 +1,39 @@
 import asyncio
-from pipecat.pipeline.runner import PipelineRunner
-from pipecat.pipeline.task import PipelineTask
+from pipecat.frames import TextFrame, ImageFrame, AudioFrame
 from pipecat.pipeline.pipeline import Pipeline
-from pipecat.frames import TextFrame
-from my_custom_services import WakeWordDetectionService, ImageToTextService, AudioToTextService, InsultTextService, TTSService, PlaySpeechService
+from pipecat.pipeline.task import PipelineTask
+from pipecat.pipeline.runner import PipelineRunner
+from my_custom_services import ImageToTextService, CartesiaTTSService, PlaySpeechService
 
 # Initialize services
-wake_word_service = WakeWordDetectionService()
 image_to_text_service = ImageToTextService(api_key='GEMINI_API_KEY')
-audio_to_text_service = AudioToTextService(api_key='GEMINI_API_KEY')
-insult_service = InsultTextService(api_key='GEMINI_API_KEY')  # Service to generate insult text
-tts_service = TTSService(api_key='CARTESIA_API_KEY')
-play_speech_service = PlaySpeechService()  # Plays the generated speech
+tts_service = CartesiaTTSService(api_key='CARTESIA_API_KEY', voice_id='your-voice-id')
+play_speech_service = PlaySpeechService()
 
-# Runner to manage multiple tasks
+# Runner to manage tasks
 runner = PipelineRunner()
 
-# Event handler for wake word detection
-async def on_wake_word_detected():
-    # 1. Capture image and process it to text (Pipe 1)
-    #12a video flash example, swap in local transport and add deepgram element in transport (requires deepgram api key)
-    # OR ....
-    # Just see if you can get the local transport working and it will work for us, just write a little wrapper as a pipecat service
-    # self.pushframe 
-    # 
-    image_task = PipelineTask(Pipeline([image_to_text_service]))
-    await runner.run(image_task)
-    image_text_frame = image_task.get_result()  # Resulting text from image
-
-    # 2. Record audio and process it to text (Pipe 2)
-    audio_task = PipelineTask(Pipeline([audio_to_text_service]))
-    await runner.run(audio_task)
-    audio_text_frame = audio_task.get_result()  # Resulting text from audio
-
-    # 3. Combine text from image and audio
-    combined_text = image_text_frame.data + " " + audio_text_frame.data
-    combined_text_frame = TextFrame(data=combined_text)
+# Function to link the pipelines
+async def process_image_to_speech():
+    # Step 1: Pipeline 1 - Process the image and convert to text
+    image_frame = ImageFrame(data="image data")  # Simulated image frame
+    image_pipeline = Pipeline([image_to_text_service])
+    image_task = PipelineTask(image_pipeline)
     
-    # 3.1 Send combined text to Gemini for insult generation (Pipe 3)
-    insult_task = PipelineTask(Pipeline([insult_service]))
-    await insult_task.process(combined_text_frame)  # Send combined text for insult generation
-    await runner.run(insult_task)
-    insult_text_frame = insult_task.get_result()  # Get the insult text
+    # Run the first pipeline and get the output (TextFrame)
+    await runner.run(image_task)
+    text_frame = image_task.result  # Capture the output (text frame)
 
-    # 4. Send the insult text to Cartesia TTS to generate speech (Pipe 4)
-    tts_task = PipelineTask(Pipeline([tts_service]))
-    await tts_task.process(insult_text_frame)
-    await runner.run(tts_task)
+    # Step 2: Pipeline 2 - Take the text and convert it to speech using run_tts
+    async for tts_frame in tts_service.run_tts(text_frame.data):
+        if isinstance(tts_frame, AudioFrame):
+            await play_speech_service.play(tts_frame)  # Play the generated audio
+        elif isinstance(tts_frame, TTSStoppedFrame):
+            break  # Stop when the TTS process is done
 
-    # 5. Play the generated speech
-    speech_frame = tts_task.get_result()  # The resulting audio frame (speech)
-    await play_speech_service.play(speech_frame)
-
-# Main loop to listen for the wake word and trigger the process
+# Main event loop to start the process
 async def main():
-    while True:
-        if await wake_word_service.listen_for_wake_word():  # Blocking call until wake word detected
-            await on_wake_word_detected()
+    await process_image_to_speech()
 
-# Run the main loop
 if __name__ == "__main__":
     asyncio.run(main())
