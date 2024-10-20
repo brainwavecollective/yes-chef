@@ -56,14 +56,14 @@ def gemini_chat(pil_image):
 
     # Generate a response based on the image
     response = model.generate_content([
-        """You are to provide a detailed description of the provided image. Descriptions should be clear, accurate, and most importantly should describe the appearance of the person or people in the image. Age, gender, appearance, clothing, body language, and any other salient details. The response should not contain any preamble or other commentary.""",
+        """You are an animatronic comedic chef muppet that is abbrasive and insulting, like Gordon Ramsey. Analyze the provided image and the person or people in the image. Then berate them with insults and criticisms. You should be sure to refer to people as 'muppets', 'fucking muppets' and other such name calling. Insult their appeaance and their ability to cook. If they have any food with them in the picture, be sure to insult the quality or presentation of the food. Remember, that you should be as insulting and awful as you can be, since that is what people will be expeceting when they interact with you.""",
         gemini_file,
     ],
     safety_settings={
-        HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-        HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_ONLY_HIGH
+#        HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+#        HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+#        HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+#        HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_ONLY_HIGH
     })
     
     return response.text
@@ -71,6 +71,6 @@ def gemini_chat(pil_image):
 # Main execution
 if __name__ == "__main__":
     # Load the image to analyze
-    img = Image.open("taken_image.jpg")  # Replace with your image file path
+    img = Image.open("taken_image.jpg")
     result = gemini_chat(img)
     print(result)
