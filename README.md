@@ -8,21 +8,17 @@ This repo covers everything you need to create and run your very own multimodal 
 
 # Prerequisites 
 
-**Cartesia API Key** for TTS 
-https://play.cartesia.ai/  
-FYI - during this entire process (24 hours) we consumed 17911 characters.  
+[**Cartesia API Key**](https://play.cartesia.ai/) (TTS)  
+FYI - during our ~24 hours of agressive building we consumed 17911 characters.  
 
-**Weights and Biases Weave API Key** for observability & tracing  
-https://wandb.ai/authorize  
-https://wandb.me/weave - FYI here are the docs  
+[**Weights and Biases Weave API Key**](https://wandb.ai/authorize) (observability & tracing)  
+FYI [Weave docs](https://wandb.me/weave)  
 
-**Google Gemini API Key** for LLM interactions  
-https://ai.google.dev/gemini-api  
+[**Google Gemini API Key**](https://ai.google.dev/gemini-api) (LLM interactions)  
 
-**Picovoice** for the wake word  
-https://picovoice.ai/docs/porcupine/   
+[**Picovoice**](https://picovoice.ai/docs/porcupine/) (wake word recognition)  
  
-Once you have setup the prerequisites, you will need to move `example.env` to `.env` and update the variables accordingly.
+Once you have setup the prerequisites, you will need to move `example.env` to `.env` and update the variables accordingly.   
 
 # Hardware 
 
