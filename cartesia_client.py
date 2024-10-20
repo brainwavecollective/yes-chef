@@ -22,6 +22,8 @@ class CartesiaStreamingClient:
         self.voice_id = "1df86052-512c-4d8e-b933-f955b27f7f42"
         self.model_id = "sonic-english"
         self.rate = 44100
+        self.talk_speed = 'slow'
+
         self.puppet = puppet
         self.audio_playing = False
         self.p = pyaudio.PyAudio()
@@ -42,13 +44,15 @@ class CartesiaStreamingClient:
                 "encoding": "pcm_s16le",
                 "sample_rate": self.rate,
             }
-
+            all_chunks = b''
             if use_sse:
                 async for chunk in self._stream_sse(text, output_format):
-                    await self._handle_chunk(chunk)
+                    all_chunks += await self._handle_chunk(chunk)
             else:
                 async for chunk in self._stream_websocket(text, output_format):
-                    await self._handle_chunk(chunk)
+                    all_chunks += await self._handle_chunk(chunk)
+            return all_chunks
+        
         finally:
             # Ensure the mouth is closed after streaming is complete
             if self.puppet:
@@ -78,8 +82,7 @@ class CartesiaStreamingClient:
                 continue_=False,
                 add_timestamps=True,
                 output_format=output_format,
-            )
-            
+            )            
 
             start_time = asyncio.get_event_loop().time()
             # Import pygame and initialize the mixer
@@ -120,7 +123,7 @@ class CartesiaStreamingClient:
 
     async def _handle_chunk(self, chunk: Dict[str, Union[bytes, float]]):
         audio_data = np.frombuffer(chunk['audio'], dtype=np.int16)
-        volume_multiplier = 2
+        volume_multiplier = 1.2
         audio_data = (audio_data * volume_multiplier).astype(np.int16)
 
         # Print audio statistics
@@ -138,6 +141,7 @@ class CartesiaStreamingClient:
             await loop.run_in_executor(self.executor, self.puppet.move_mouth, audio_data.tobytes())
 
         print(f"Timestamp: {chunk['timestamp']:.2f}s")
+        return audio_data.tobytes()
 
     async def close(self):
         if self.audio_stream:

@@ -35,8 +35,8 @@ def upload_to_gemini(pil_image, mime_type=None):
 # Retry logic in case of resource exhaustion
 @weave.op
 @retry.Retry(predicate=retry.if_exception_type(exceptions.ResourceExhausted))
-def gemini_chat(pil_image):
-    gemini_file = upload_to_gemini(pil_image)
+def gemini_chat(image):
+    gemini_file = upload_to_gemini(image)
     print(gemini_file)
 
     # Set model generation parameters
