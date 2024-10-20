@@ -1,12 +1,14 @@
-# yes-chef
+# Yes Chef! 
 
-Yes Chef! provides everything you need to run a multimodal animatronic robot capable of responding to your voice commands. Although some aspects rely on readily available products and services, this project overwhelmingly builds upon on Open Source efforts, to include the robotic arm itself. 
+This repo covers everything you need to create and run your very own multimodal animatronic robot capable of responding to your voice commands. Although some aspects rely on readily available products and services, this project overwhelmingly builds upon on Open Source efforts, to include the robotic arm itself. 
+
+![Yes Chef!](./yes-chef.jpeg)
 
 **WARNING**: Our robot may be cute, but he is not suitable for children. As presented this will create a robot that is extremely foul mouthed and will mercilessly insult you. His words cut deep. You have been warned.  
 
 # Hardware 
 
-While this effort is focused on the SO-ARM100 v1.2, there is no reason why any other Open Source robotic arm could not be used, albeit with minor modifications. Our results can be entirely reproduced using only a follower arm, so the leader arm can be ignored for this project.  The following is required:  
+While this effort is focused on the [SO-ARM100 v1.2](https://github.com/TheRobotStudio/SO-ARM100), there is no reason why any other Open Source robotic arm could not be used, albeit with minor modifications. Our results can be entirely reproduced using only a follower arm, so the leader arm can be ignored for this project.  The following is required:  
 
  - Robotic Arm (e.g., SO-ARM100 v1.2)
  - A server (laptop, Raspberry Pi, etc.)
@@ -16,7 +18,7 @@ While this effort is focused on the SO-ARM100 v1.2, there is no reason why any o
 
 # Hardware Configuration 
 
-This entire project was inspired by, and would not have been possible without HuggingFace's incredible LeRobot. LeRobot includes scripts to help you setup your servos during the build process, as well as identify things on your host like port configurations. Additionally, the related libraries greatly simplify interactions. In short, without LeRobot we wouldn't have been able to enable the overwhelming majority of the functionality that you see here.  
+This entire project was inspired by, and would not have been possible without HuggingFace's incredible [LeRobot](https://github.com/huggingface/lerobot). LeRobot includes scripts to help you setup your servos during the build process, as well as identify things on your host like port configurations. Additionally, the related libraries greatly simplify interactions. In short, without LeRobot we wouldn't have been able to enable the overwhelming majority of the functionality that you see here.  
 
 **IMPORTANT!!!*  
 
@@ -50,6 +52,11 @@ This is the phrase that will cause the robot to come alive.
 ## Step 1: Run the service : `python main.py`
 ## Step 2: Say the wake word "Hello Chef!"
 ## Step 3: Get Roasted 
+
+# Team 
+[Alex Volkov](https://www.linkedin.com/in/alex-volkov-/)
+[Daniel Ritchie](https://www.linkedin.com/in/danielritchie123/)
+[Junaid Dawud](https://www.linkedin.com/in/junaid-dawud-48529564/)
 
 Enjoy. We sure had fun with this one!  
 
