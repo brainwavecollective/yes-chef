@@ -6,6 +6,24 @@ This repo covers everything you need to create and run your very own multimodal 
 
 **WARNING**: Our robot may be cute, but he is not suitable for children. As presented this will create a robot that is extremely foul mouthed and will mercilessly insult you. His words cut deep. You have been warned.  
 
+# Prerequisites 
+
+**Cartesia API Key** for TTS 
+https://play.cartesia.ai/  
+FYI - during this entire process (24 hours) we consumed 17911 characters.  
+
+**Weights and Biases Weave API Key** for observability & tracing  
+https://wandb.ai/authorize  
+https://wandb.me/weave - FYI here are the docs  
+
+**Google Gemini API Key** for LLM interactions  
+https://ai.google.dev/gemini-api  
+
+**Picovoice** for the wake word  
+https://picovoice.ai/docs/porcupine/   
+ 
+Once you have setup the prerequisites, you will need to move `example.env` to `.env` and update the variables accordingly.
+
 # Hardware 
 
 While this effort is focused on the [SO-ARM100 v1.2](https://github.com/TheRobotStudio/SO-ARM100), there is no reason why any other Open Source robotic arm could not be used, albeit with minor modifications. Our results can be entirely reproduced using only a follower arm, so the leader arm can be ignored for this project.  The following is required:  
