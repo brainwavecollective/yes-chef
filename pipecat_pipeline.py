@@ -9,46 +9,39 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineTask
-
-
-# Mock services for local testing
-class MockCameraModule:
-    def capture_image(self):
-        print("Mock: Capturing image...")
-        return "mock_image_data"  # Simulating image data
-
-
-class MockChefPuppetControl:
-    def sync_mouth(self, duration):
-        print(f"Mock: Syncing puppet mouth for {duration} seconds...")
-
-
-class MockCartesiaTTSService:
-    async def generate_tts(self, description):
-        print(f"Mock: Converting '{description}' to speech...")
-        return MockTTSResult(duration=2.5)  # Simulating 2.5 seconds of speech
-
-
-class MockTTSResult:
-    def __init__(self, duration):
-        self.duration = duration
-        self.audio = "mock_audio_data"
+from pipecat.services.cartesia import CartesiaTTSService  # Assuming you have a real Cartesia TTS service
+from camera_module import CameraModule  # Assuming you have a real camera module
+from ImageDescription import gemini_chat  # Real Gemini analysis service
+from chef_puppet_control import ChefPuppetControl  # Real puppet control service
 
 
 # Custom processor for wake word detection
 class WakeWordProcessor(FrameProcessor):
     def __init__(self):
         super().__init__()
-        print("Simulating Porcupine wake word detection setup...")
+        try:
+            # Initialize Porcupine with a real access key and wake word model
+            self.porcupine = pvporcupine.create(
+                access_key="your_picovoice_access_key",  # Replace with your actual access key
+                keywords=["porcupine"]  # Replace with the correct wake word or model
+            )
+        except Exception as e:
+            print(f"Failed to initialize Porcupine: {e}")
 
     async def process(self, frame, context):
-        # Simulate wake word detection by returning a "wake word detected" result
-        print("Simulating wake word detection...")
-        frame["wake_word_detected"] = True  # Simulate that the wake word was detected
-        return frame  # Return the modified frame to continue the pipeline
+        try:
+            print("Listening for wake word...")
+            keyword_index = self.porcupine.process(frame.audio)
+            if keyword_index >= 0:
+                print("Wake word detected!")
+                return frame  # Proceed to the next processor
+        except Exception as e:
+            print(f"Error processing audio frame: {e}")
+        return None  # Continue listening if no wake word is detected
 
     def cleanup(self):
-        print("Simulating cleanup...")
+        if self.porcupine:
+            self.porcupine.delete()
 
     def set_parent(self, parent):
         self.parent = parent
@@ -56,14 +49,14 @@ class WakeWordProcessor(FrameProcessor):
 
 # Custom processor for camera capture
 class CameraCaptureProcessor(FrameProcessor):
-    def __init__(self, camera_module):
+    def __init__(self):
         super().__init__()
-        self.camera = camera_module
+        self.camera = CameraModule()  # Use the real camera module
 
     async def process(self, frame, context):
         print("Capturing image...")
         try:
-            image = self.camera.capture_image()  # Capture mock image
+            image = self.camera.capture_image()  # Capture real image
             if image is None:
                 raise RuntimeError("Failed to capture image.")
             frame["image"] = image
@@ -84,16 +77,12 @@ class GeminiPhotoAnalysisProcessor(FrameProcessor):
             image = frame.get("image")
             if image is None:
                 raise ValueError("No image found in the frame!")
-            description = await self.mock_gemini_chat(image)  # Mock Gemini analysis
+            description = await gemini_chat(image)  # Send image to the real Gemini service
             frame["description"] = description
         except Exception as e:
             print(f"Error in Gemini photo analysis: {e}")
             return None
         return frame
-
-    async def mock_gemini_chat(self, image):
-        print(f"Mock: Analyzing image: {image}")
-        return "mock_image_description"
 
     def set_parent(self, parent):
         self.parent = parent
@@ -101,9 +90,9 @@ class GeminiPhotoAnalysisProcessor(FrameProcessor):
 
 # Custom processor for Cartesia TTS service
 class CartesiaTTSProcessor(FrameProcessor):
-    def __init__(self, tts_service):
+    def __init__(self):
         super().__init__()
-        self.tts_service = tts_service
+        self.tts_service = CartesiaTTSService(api_key="your_cartesia_api_key", voice_id="your_voice_id")  # Real Cartesia service
 
     async def process(self, frame, context):
         try:
@@ -111,7 +100,7 @@ class CartesiaTTSProcessor(FrameProcessor):
             description = frame.get("description")
             if description is None:
                 raise ValueError("No description found in the frame!")
-            tts_result = await self.tts_service.generate_tts(description)
+            tts_result = await self.tts_service.generate_tts(description)  # Use the real TTS service
             frame["tts_audio"] = tts_result.audio
             frame["tts_duration"] = tts_result.duration
         except Exception as e:
@@ -125,9 +114,9 @@ class CartesiaTTSProcessor(FrameProcessor):
 
 # Custom processor for mouth movement synchronization
 class ServoMouthSyncProcessor(FrameProcessor):
-    def __init__(self, puppet_control):
+    def __init__(self):
         super().__init__()
-        self.puppet_control = puppet_control
+        self.puppet_control = ChefPuppetControl()  # Use the real puppet control service
 
     async def process(self, frame, context):
         try:
@@ -135,7 +124,7 @@ class ServoMouthSyncProcessor(FrameProcessor):
             tts_duration = frame.get("tts_duration")
             if tts_duration is None:
                 raise ValueError("No TTS duration found in the frame!")
-            # Sync the mouth movement to match the TTS duration (mocked)
+            # Sync the mouth movement to match the TTS duration using the real puppet control
             self.puppet_control.sync_mouth(tts_duration)
         except Exception as e:
             print(f"Error in mouth sync: {e}")
@@ -147,25 +136,20 @@ class ServoMouthSyncProcessor(FrameProcessor):
 
 # Main function to set up and run the pipeline
 async def main():
-    # Use mock services for local testing
-    camera_module = MockCameraModule()
-    puppet_control = MockChefPuppetControl()
-    tts_service = MockCartesiaTTSService()
-
     # Create processors for each step
-    wake_word_processor = WakeWordProcessor()
-    camera_processor = CameraCaptureProcessor(camera_module)
-    gemini_processor = GeminiPhotoAnalysisProcessor()
-    tts_processor = CartesiaTTSProcessor(tts_service)
-    servo_processor = ServoMouthSyncProcessor(puppet_control)
+    wake_word_processor = WakeWordProcessor()        # Step 1: Wake word detection
+    camera_processor = CameraCaptureProcessor()      # Step 2: Capture image
+    gemini_processor = GeminiPhotoAnalysisProcessor()  # Step 3: Analyze image with Gemini
+    tts_processor = CartesiaTTSProcessor()           # Step 4: Convert Gemini text to speech
+    servo_processor = ServoMouthSyncProcessor()      # Step 5: Sync puppet mouth with TTS
 
     # Create the Pipecat pipeline with all processors
     pipeline = Pipeline([
-        wake_word_processor,    # Step 1: Wake word detection
-        camera_processor,       # Step 2: Capture image
-        gemini_processor,       # Step 3: Analyze image with Gemini
-        tts_processor,          # Step 4: Convert Gemini text to speech
-        servo_processor         # Step 5: Sync puppet mouth with TTS
+        wake_word_processor,
+        camera_processor,
+        gemini_processor,
+        tts_processor,
+        servo_processor
     ])
 
     # Create a task to run the pipeline
