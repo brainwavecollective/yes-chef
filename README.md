@@ -6,19 +6,19 @@ This repo covers everything you need to create and run your very own multimodal 
 
 **WARNING**: Our robot may be cute, but he is not suitable for children. As presented this will create a robot that is extremely foul mouthed and will mercilessly insult you. His words cut deep. You have been warned.  
 
-# Prerequisites 
+# Prerequisites
 
-[**Cartesia API Key**](https://play.cartesia.ai/) (TTS)  
-FYI - during our ~24 hours of agressive building we consumed 17911 characters.  
+- [**Cartesia API Key**](https://play.cartesia.ai/) (TTS)  
+  > FYI: During our ~24 hours of aggressive building, we consumed 17,911 characters.
 
-[**Weights and Biases Weave API Key**](https://wandb.ai/authorize) (observability & tracing)  
-FYI [Weave docs](https://wandb.me/weave)  
+- [**Weights and Biases Weave API Key**](https://wandb.ai/authorize) (Observability & Tracing)  
+  > FYI: See the [Weave Docs](https://wandb.me/weave) for more details.
 
-[**Google Gemini API Key**](https://ai.google.dev/gemini-api) (LLM interactions)  
+- [**Google Gemini API Key**](https://ai.google.dev/gemini-api) (LLM Interactions)
 
-[**Picovoice**](https://picovoice.ai/docs/porcupine/) (wake word recognition)  
- 
-Once you have setup the prerequisites, you will need to move `example.env` to `.env` and update the variables accordingly.   
+- [**Picovoice**](https://picovoice.ai/docs/porcupine/) (Wake Word Recognition)
+
+Once you have set up the prerequisites, move `example.env` to `.env` and update the variables accordingly.
 
 # Hardware 
 
