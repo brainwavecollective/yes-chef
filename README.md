@@ -49,14 +49,14 @@ We support a number of background music options. These are randomly selected for
 This is the phrase that will cause the robot to come alive.  
 
 # Operating the Robot 
-## Step 1: Run the service : `python main.py`
-## Step 2: Say the wake word "Hello Chef!"
-## Step 3: Get Roasted 
+### Step 1: Run the service : `python main.py`  
+### Step 2: Say the wake word "Hello Chef!"  
+### Step 3: Get Roasted   
 
 # Team 
 [Alex Volkov](https://www.linkedin.com/in/alex-volkov-/)  
 [Daniel Ritchie](https://www.linkedin.com/in/danielritchie123/)  
 [Junaid Dawud](https://www.linkedin.com/in/junaid-dawud-48529564/)  
 
-Enjoy. We sure had fun with this one!   
+*DISCLAIMER: The advanced anamatronic kitchen assistant featured in this video, affectionately known as 'Chef Gordo', bears absolutely no relation to any foul-mouthed, blonde-haired celebrity chefs. Any perceived similarities to a certain hot-tempered culinary icon are purely coincidental and not at all the result of binge-watching 72 straight hours of Hell's Kitchen. The fact that our robot refers to risotto as 'f-ing raw' and has an inexplicable hatred for idiot sandwiches is merely a quirk of its sophisticated language model. We categorically deny sampling fair use audio from any TV shows featuring temperamental British restaurateurs. The robot's tendency to smash undercooked scallops against contestants' foreheads is a random glitch and not a carefully programmed homage. Any legal action from Scottish celebrity chefs or their representatives is unnecessary and frankly f-ing donkey-brained. It's not Gordon Ramsay, it's just a tin can that happens to swear a lot and make exquisite beef Wellington.*
 
