@@ -1,58 +1,55 @@
 # yes-chef
 
+Yes Chef! provides everything you need to run a multimodal animatronic robot capable of responding to your voice commands. Although some aspects rely on readily available products and services, this project overwhelmingly builds upon on Open Source efforts, to include the robotic arm itself. 
 
+**WARNING**: Our robot may be cute, but he is not suitable for children. As presented this will create a robot that is extremely foul mouthed and will mercilessly insult you. His words cut deep. You have been warned.  
 
-## Raspberry Pi / Servo Control Board Integration 
+# Hardware 
 
-The board communicates with the Raspberry Pi using the UART interface, leveraging the Raspberry Pi’s GPIO pins for serial communication. 
+While this effort is focused on the SO-ARM100 v1.2, there is no reason why any other Open Source robotic arm could not be used, albeit with minor modifications. Our results can be entirely reproduced using only a follower arm, so the leader arm can be ignored for this project.  The following is required:  
 
-### Raspberry Pi Hardware Config 
+ - Robotic Arm (e.g., SO-ARM100 v1.2)
+ - A server (laptop, Raspberry Pi, etc.)
+ - Webcam (to see what Chef is going to be insulting)
+ - Microphone (ours includes a webcam)
+ - A Speaker (for all audio)
 
-| Pi Pin | Purpose | 
-| ------ | ------- | 
-| GPIO 14 (Pin 8)| TX |
-| GPIO 15 (Pin 10) | RX |
+# Hardware Configuration 
 
+This entire project was inspired by, and would not have been possible without HuggingFace's incredible LeRobot. LeRobot includes scripts to help you setup your servos during the build process, as well as identify things on your host like port configurations. Additionally, the related libraries greatly simplify interactions. In short, without LeRobot we wouldn't have been able to enable the overwhelming majority of the functionality that you see here.  
 
-### Raspberry Pi Software Config
+**IMPORTANT!!!*  
 
-#### Enable UART 
-UART can be enabled by configuring the Pi’s /boot/config.txt file or using the raspi-config tool: `sudo raspi-config`  
-Navigate to Interfacing Options → Serial → Enable UART.
+A lot of the configuration that we have in place expects that you will have appropriately setup and configured your robotic arm. Generally speaking, the steps for this vary greatly, but in this case, there may be additional considerations for your specific robotic arm and and potential puppet that you have in place as well. In short, please be diligent to ensure that you have performed all necessary steps *for your particular implementation*  
 
-#### Install SO-ARM100 Library 
-```
-git clone https://github.com/TheRobotStudio/SO-ARM100
-cd SO-ARM100
-make install
-```
+# Environment Setup
+After your robot is built, it will need to be connected to your server VIA USB. While you can use a laptop for this, we used a Raspberry Pi.  
 
-### Raspberry Pi Control Code 
-Once UART is enabled and libraries installed, you can write code to control the servos via UART.
-Python Code Example (using UART): You can use the pyserial library to send commands to the control board via UART:
-In this example:
-`/dev/serial0` is the UART device on the Raspberry Pi.
-The move_servo function sends a command to a specified servo (by ID) to move it to a certain angle.
-Note: The exact command format (byte sequence) depends on the protocol defined by the control board for serial bus servos.
-```
-import serial
-import time
+Once connected to your server, with all necessary hardware configured and correct mapped out, you will need to bring down a specific branch of LeRobot to ensure that you have the latest info. Note: this is expected to be updated to the main branch soon `pip install git+ssh://git@github.com/huggingface/lerobot.git@user/rcadene/2024_09_04_feetech`  
 
-# Initialize UART serial communication with the control board
-ser = serial.Serial('/dev/serial0', 115200, timeout=1)
+Then run `pip install -r requirements.txt` to install dependenceis for this project.
 
-# Send a command to move a servo
-def move_servo(servo_id, angle):
-    command = bytearray([servo_id, angle])
-    ser.write(command)
-    time.sleep(0.1)
+## Configurable Settings 
 
-# Example: Move servo 1 to 90 degrees
-move_servo(1, 90)
-```
+### Response Prompt 
+Ours is crafted to produce a specific type of insulting response, but you can modify this to suit your own needs.
 
-### Receiving UART Feedback (Optional)
-The Wonrabai board supports receiving feedback from servos (such as angle, voltage, load, etc.). You can read data from the UART port using ser.read() to get this feedback and process it in your code, enabling more complex interactions (e.g., closed-loop control).  
+### Wake & Sleep Positions 
+We used a script that we created (and intend to submit to LeRobot) which records current positions of the robot for future use. Specifically, we held the arm in the position that we wanted, once for "slumped over and sleeping" and another for "awak and on a rampage."  As you can imagine, these positions are specific to the puppet that we used, and will vary based on the avatar that you use.
 
+### Input Voice 
+Cartesia offers the ability to use a multitude of voices, including ones that you train using your own voice. In short, your robot can sound like anything that you would want it to.
 
+### Background Music 
+We support a number of background music options. These are randomly selected for each run, but you will need to upload the music of your choice. We used Suno to generate ours.
+
+### Wake Word 
+This is the phrase that will cause the robot to come alive.  
+
+# Operating the Robot 
+## Step 1: Run the service : `python main.py`
+## Step 2: Say the wake word "Hello Chef!"
+## Step 3: Get Roasted 
+
+Enjoy. We sure had fun with this one!  
 
