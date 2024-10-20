@@ -13,14 +13,14 @@ While this effort is focused on the [SO-ARM100 v1.2](https://github.com/TheRobot
  - Robotic Arm (e.g., SO-ARM100 v1.2)
  - A server (laptop, Raspberry Pi, etc.)
  - Webcam (to see what Chef is going to be insulting)
- - Microphone (ours includes a webcam)
+ - Microphone (ours came with our webcam)
  - A Speaker (for all audio)
 
 # Hardware Configuration 
 
 This entire project was inspired by, and would not have been possible without HuggingFace's incredible [LeRobot](https://github.com/huggingface/lerobot). LeRobot includes scripts to help you setup your servos during the build process, as well as identify things on your host like port configurations. Additionally, the related libraries greatly simplify interactions. In short, without LeRobot we wouldn't have been able to enable the overwhelming majority of the functionality that you see here.  
 
-**IMPORTANT!!!*  
+**IMPORTANT!!!**  
 
 A lot of the configuration that we have in place expects that you will have appropriately setup and configured your robotic arm. Generally speaking, the steps for this vary greatly, but in this case, there may be additional considerations for your specific robotic arm and and potential puppet that you have in place as well. In short, please be diligent to ensure that you have performed all necessary steps *for your particular implementation*  
 
